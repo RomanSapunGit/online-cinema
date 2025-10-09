@@ -11,7 +11,7 @@ from database.models.base import Base
 
 if TYPE_CHECKING:
     from database.models.order_models import OrderItemModel
-    from database.models.shopping_cart_models import CartItemModel
+    from database.models.cart_models import CartItemModel
 
 
 movie_genres = Table(

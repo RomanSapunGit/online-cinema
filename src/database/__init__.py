@@ -12,7 +12,7 @@ from database.models.movie_models import (
 from database.models.payment_models import (
     PaymentModel,
 )
-from database.models.shopping_cart_models import (
+from database.models.cart_models import (
     CartModel,
 )
 from database.models.user_models import (
