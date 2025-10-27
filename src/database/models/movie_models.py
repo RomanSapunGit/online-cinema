@@ -106,6 +106,24 @@ class CertificationModel(Base):
     movies: Mapped[List["MovieModel"]] = relationship(
         "MovieModel",
         back_populates="certification",
+        cascade="all, delete-orphan"
+    )
+
+
+class CommentModel(Base):
+    __tablename__ = "comments"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    text: Mapped[str] = mapped_column(nullable=False)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.now(tz=timezone.utc))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    user: Mapped["UserModel"] = relationship(
+        "UserModel",
+        back_populates="comments",
+    )
+    movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id"), nullable=False)
+    movie: Mapped["MovieModel"] = relationship(
+        "MovieModel",
+        back_populates="comments",
     )
 
 
