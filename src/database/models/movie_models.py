@@ -35,6 +35,37 @@ movie_directors = Table(
     Column("director_id", ForeignKey("directors.id"), primary_key=True),
 )
 
+
+class IsLikeEnum(str, enum.Enum):
+    LIKE = "Like"
+    NOT_SET = "Not set"
+    DISLIKE = "Dislike"
+
+
+class MovieRatingModel(Base):
+    __tablename__ = "movies_rating"
+
+    movie_id: Mapped[int] = mapped_column(
+        ForeignKey("movies.id", ondelete="CASCADE"),
+        primary_key=True
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True
+    )
+
+    rating: Mapped[int | None] = mapped_column(
+        Integer,
+        CheckConstraint("rating >= 0 AND rating <= 10")
+    )
+
+    is_liked: Mapped[IsLikeEnum | None] = mapped_column(Enum(IsLikeEnum), nullable=True)
+    is_favorite: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    movie: Mapped["MovieModel"] = relationship("MovieModel", back_populates="ratings")
+    user: Mapped["UserModel"] = relationship("UserModel", back_populates="ratings")
+
+
 class GenreModel(Base):
     __tablename__ = "genres"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
