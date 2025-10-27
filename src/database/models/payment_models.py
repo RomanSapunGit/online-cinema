@@ -1,6 +1,7 @@
 from __future__ import annotations
 import enum
 from datetime import datetime
+from decimal import Decimal
 from typing import List, Optional, TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, DateTime, func, Enum, DECIMAL, String
@@ -35,7 +36,7 @@ class PaymentModel(Base):
         nullable=False
     )
     status: Mapped[StatusEnum] = mapped_column(Enum(StatusEnum), nullable=False)
-    amount: Mapped[DECIMAL] = mapped_column(DECIMAL(10,2), nullable=False)
+    amount: Mapped[Decimal] = mapped_column(DECIMAL(10, 2), nullable=False)
     external_payment_id: Mapped[Optional[str]] = mapped_column(String(500))
 
 
