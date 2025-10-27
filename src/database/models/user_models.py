@@ -1,18 +1,27 @@
 from __future__ import annotations
 import enum
-from datetime import datetime
-from typing import List, TYPE_CHECKING
+from datetime import datetime, date
+from typing import List, TYPE_CHECKING, Optional
 
-from sqlalchemy import DateTime, Boolean, Integer, String, func, Enum
+from sqlalchemy import DateTime, Boolean, Integer, String, func, Enum, Text, Date, UniqueConstraint, ForeignKey
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 from database.models.base import Base
-
+from database.models.movie_models import MovieRatingModel
+from schemas import validators
+from security.passwords import hash_password, verify_password
 
 if TYPE_CHECKING:
+    from database import MovieModel, ActivationTokenModel, PasswordResetTokenModel, RefreshTokenModel
+    from database.models.movie_models import CommentModel
     from database.models.order_models import OrderModel
     from database.models.payment_models import PaymentModel
     from database.models.cart_models import CartModel
+
+
+class GenderEnum(str, enum.Enum):
+    MAN = "man"
+    WOMAN = "woman"
 
 
 class UserGroupEnum(str, enum.Enum):
@@ -47,8 +56,49 @@ class UserModel(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
     cart: Mapped["CartModel"] = relationship("CartModel", back_populates="user")
-    orders: Mapped[List["OrderModel"]] = relationship("OrderModel", back_populates="user")
+    orders: Mapped[List["OrderModel"]] = relationship(
+        "OrderModel",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
     payments: Mapped[List["PaymentModel"]] = relationship("PaymentModel", back_populates="user")
+    group_id: Mapped[int] = mapped_column(ForeignKey("user_groups.id", ondelete="CASCADE"), nullable=False)
+    group: Mapped["UserGroupModel"] = relationship("UserGroupModel", back_populates="users")
+
+    activation_token: Mapped[Optional["ActivationTokenModel"]] = relationship(
+        "ActivationTokenModel",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
+    password_reset_token: Mapped[Optional["PasswordResetTokenModel"]] = relationship(
+        "PasswordResetTokenModel",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
+    refresh_tokens: Mapped[List["RefreshTokenModel"]] = relationship(
+        "RefreshTokenModel",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
+    profile: Mapped[Optional["UserProfileModel"]] = relationship(
+        "UserProfileModel",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+
+    comments: Mapped[List["CommentModel"]] = relationship(
+        "CommentModel",
+        back_populates="user",
+    )
+
+    ratings: Mapped[List["MovieRatingModel"]] = relationship(
+        "MovieRatingModel",
+        back_populates="user"
+    )
+
     def __repr__(self):
         return f"<UserModel(id={self.id}, email={self.email}, is_active={self.is_active})>"
 
@@ -62,10 +112,36 @@ class UserModel(Base):
     def password(self) -> None:
         raise AttributeError("Password is write-only. Use the setter to set the password.")
 
-    # @password.setter
-    # def password(self, raw_password: str) -> None:
-    #     validators.validate_password_strength(raw_password)
-    #     self._hashed_password = hash_password(raw_password)
-    #
-    # def verify_password(self, raw_password: str) -> bool:
-    #     return verify_password(raw_password, self._hashed_password)
+    @password.setter
+    def password(self, raw_password: str) -> None:
+        validators.validate_password_strength(raw_password)
+        self._hashed_password = hash_password(raw_password)
+
+    def verify_password(self, raw_password: str) -> bool:
+        return verify_password(raw_password, self._hashed_password)
+
+
+class UserProfileModel(Base):
+    __tablename__ = "user_profiles"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    first_name: Mapped[Optional[str]] = mapped_column(String(100))
+    last_name: Mapped[Optional[str]] = mapped_column(String(100))
+    avatar: Mapped[Optional[str]] = mapped_column(String(255))
+    gender: Mapped[Optional[GenderEnum]] = mapped_column(Enum(GenderEnum))
+    date_of_birth: Mapped[Optional[date]] = mapped_column(Date)
+    info: Mapped[Optional[str]] = mapped_column(Text)
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True)
+    user: Mapped[UserModel] = relationship("UserModel", back_populates="profile")
+
+    __table_args__ = (UniqueConstraint("user_id"),)
+
+    def __repr__(self):
+        return (
+            f"<UserProfileModel(id={self.id}, first_name={self.first_name}, last_name={self.last_name}, "
+            f"gender={self.gender}, date_of_birth={self.date_of_birth})>"
+        )
