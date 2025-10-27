@@ -2,7 +2,7 @@ from logging.config import fileConfig
 
 from alembic import context
 
-from database.database import sync_postgresql_engine
+from database.database_postgres import sync_postgresql_engine
 from database.models import Base
 
 target_metadata = Base.metadata
