@@ -1,6 +1,11 @@
 from __future__ import annotations
+
+import enum
+from datetime import datetime, timezone
+from decimal import Decimal
 from typing import List, TYPE_CHECKING
-from sqlalchemy import String, DECIMAL, ForeignKey, UniqueConstraint, Table, Column
+from sqlalchemy import String, DECIMAL, ForeignKey, UniqueConstraint, Table, Column, Integer, CheckConstraint, Enum, \
+    Boolean
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
@@ -8,11 +13,10 @@ import uuid
 
 from database.models.base import Base
 
-
 if TYPE_CHECKING:
+    from database import UserModel
     from database.models.order_models import OrderItemModel
     from database.models.cart_models import CartItemModel
-
 
 movie_genres = Table(
     "movies_genres",
@@ -129,8 +133,8 @@ class CommentModel(Base):
 
 class MovieModel(Base):
     __tablename__ = "movies"
-    id: Mapped[int] = mapped_column(primary_key=True, unique=True, autoincrement=True)
-    uuid: Mapped[uuid.UUID] = mapped_column(default=uuid.uuid4, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    uuid: Mapped[uuid.UUID] = mapped_column(default=uuid.uuid4, unique=True)
     name: Mapped[str] = mapped_column(String(30))
     year: Mapped[int] = mapped_column(nullable=False)
     time: Mapped[int] = mapped_column(nullable=False)
@@ -139,33 +143,41 @@ class MovieModel(Base):
     meta_score: Mapped[float] = mapped_column(nullable=True)
     gross: Mapped[float] = mapped_column(nullable=True)
     description: Mapped[str] = mapped_column(nullable=False)
-    price: Mapped[DECIMAL] = mapped_column(DECIMAL(10, 2), nullable=False)
+    price: Mapped[Decimal] = mapped_column(DECIMAL(10, 2), nullable=False)
+    is_available: Mapped[bool] = mapped_column(nullable=False, default=True)
     certification_id: Mapped[int] = mapped_column(ForeignKey("certifications.id"), nullable=False)
     certification: Mapped["CertificationModel"] = relationship(
         "CertificationModel",
-        back_populates="movie",
-        cascade="all, delete-orphan"
+        back_populates="movies",
     )
     cart_items: Mapped[List["CartItemModel"]] = relationship(
         "CartItemModel",
         back_populates="movie",
         cascade="all, delete-orphan"
     )
-    order_items: Mapped[List["OrderItemModel"]] = relationship("OrderItemModel", back_populates="movies")
+    order_items: Mapped[List["OrderItemModel"]] = relationship("OrderItemModel", back_populates="movie")
     genres: Mapped[list["GenreModel"]] = relationship(
         "GenreModel",
         secondary=movie_genres,
         back_populates="movies"
     )
-    stars: Mapped[list["StarModel"]] = relationship(
+    stars: Mapped[List["StarModel"]] = relationship(
         "StarModel",
         secondary=movie_stars,
         back_populates="movies"
     )
-    directors: Mapped[list["DirectorModel"]] = relationship(
+    directors: Mapped[List["DirectorModel"]] = relationship(
         "DirectorModel",
         secondary=movie_directors,
         back_populates="movies"
+    )
+    ratings: Mapped[List["MovieRatingModel"]] = relationship(
+        "MovieRatingModel",
+        back_populates="movie"
+    )
+    comments: Mapped[List["CommentModel"]] = relationship(
+        "CommentModel",
+        back_populates="movie",
     )
     __table_args__ = (
         UniqueConstraint("name", "year", "time"),
