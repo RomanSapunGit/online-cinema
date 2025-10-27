@@ -5,8 +5,7 @@ from typing import List, TYPE_CHECKING
 from sqlalchemy import ForeignKey, DateTime, func, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from database.models.movie_models import Base
-
+from database.models.base import Base
 
 if TYPE_CHECKING:
     from database import MovieModel
