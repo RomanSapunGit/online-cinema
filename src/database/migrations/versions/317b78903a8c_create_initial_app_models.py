@@ -1,8 +1,8 @@
 """Create initial app models
 
-Revision ID: d3341a2d5a59
+Revision ID: 317b78903a8c
 Revises: 
-Create Date: 2025-10-09 17:41:44.377192
+Create Date: 2025-10-10 16:40:10.760757
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'd3341a2d5a59'
+revision: str = '317b78903a8c'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -51,23 +51,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
-    op.create_table('users',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('email', sa.String(length=255), nullable=False),
-    sa.Column('hashed_password', sa.String(length=255), nullable=False),
-    sa.Column('is_active', sa.Boolean(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
-    op.create_table('carts',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('user_id')
-    )
     op.create_table('movies',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('uuid', sa.Uuid(), nullable=False),
@@ -82,28 +65,38 @@ def upgrade() -> None:
     sa.Column('price', sa.DECIMAL(precision=10, scale=2), nullable=False),
     sa.Column('certification_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['certification_id'], ['certifications.id'], ),
-    sa.PrimaryKeyConstraint('id', 'uuid'),
+    sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('id'),
-    sa.UniqueConstraint('name', 'year', 'time')
+    sa.UniqueConstraint('name', 'year', 'time', 'uuid')
     )
-    op.create_table('orders',
+    op.create_table('users',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('email', sa.String(length=255), nullable=False),
+    sa.Column('hashed_password', sa.String(length=255), nullable=False),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('status', sa.Enum('PENDING', 'PAID', 'CANCELED', name='orderstatusenum'), nullable=False),
-    sa.Column('total_amount', sa.DECIMAL(precision=10, scale=2), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('group_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['group_id'], ['user_groups.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('cart_items',
+    op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
+    op.create_table('activation_tokens',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('cart_id', sa.Integer(), nullable=False),
-    sa.Column('movie_id', sa.Integer(), nullable=False),
-    sa.Column('added_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.ForeignKeyConstraint(['cart_id'], ['carts.id'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['movie_id'], ['movies.id'], ondelete='CASCADE'),
+    sa.Column('token', sa.String(length=64), nullable=False),
+    sa.Column('expires_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('cart_id', 'movie_id')
+    sa.UniqueConstraint('token'),
+    sa.UniqueConstraint('user_id')
+    )
+    op.create_table('carts',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id')
     )
     op.create_table('movies_directors',
     sa.Column('movie_id', sa.Integer(), nullable=False),
@@ -125,6 +118,58 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['movie_id'], ['movies.id'], ),
     sa.ForeignKeyConstraint(['star_id'], ['stars.id'], ),
     sa.PrimaryKeyConstraint('movie_id', 'star_id')
+    )
+    op.create_table('orders',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('status', sa.Enum('PENDING', 'PAID', 'CANCELED', name='orderstatusenum'), nullable=False),
+    sa.Column('total_amount', sa.DECIMAL(precision=10, scale=2), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('password_reset_tokens',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('token', sa.String(length=64), nullable=False),
+    sa.Column('expires_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('token'),
+    sa.UniqueConstraint('user_id')
+    )
+    op.create_table('refresh_tokens',
+    sa.Column('token', sa.String(length=512), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('expires_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('token')
+    )
+    op.create_table('user_profiles',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('first_name', sa.String(length=100), nullable=True),
+    sa.Column('last_name', sa.String(length=100), nullable=True),
+    sa.Column('avatar', sa.String(length=255), nullable=True),
+    sa.Column('gender', sa.Enum('MAN', 'WOMAN', name='genderenum'), nullable=True),
+    sa.Column('date_of_birth', sa.Date(), nullable=True),
+    sa.Column('info', sa.Text(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id'),
+    sa.UniqueConstraint('user_id')
+    )
+    op.create_table('cart_items',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('cart_id', sa.Integer(), nullable=False),
+    sa.Column('movie_id', sa.Integer(), nullable=False),
+    sa.Column('added_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['cart_id'], ['carts.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['movie_id'], ['movies.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('cart_id', 'movie_id')
     )
     op.create_table('order_items',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -165,15 +210,19 @@ def downgrade() -> None:
     op.drop_table('payment_items')
     op.drop_table('payments')
     op.drop_table('order_items')
+    op.drop_table('cart_items')
+    op.drop_table('user_profiles')
+    op.drop_table('refresh_tokens')
+    op.drop_table('password_reset_tokens')
+    op.drop_table('orders')
     op.drop_table('movies_stars')
     op.drop_table('movies_genres')
     op.drop_table('movies_directors')
-    op.drop_table('cart_items')
-    op.drop_table('orders')
-    op.drop_table('movies')
     op.drop_table('carts')
+    op.drop_table('activation_tokens')
     op.drop_index(op.f('ix_users_email'), table_name='users')
     op.drop_table('users')
+    op.drop_table('movies')
     op.drop_table('user_groups')
     op.drop_table('stars')
     op.drop_table('genres')
