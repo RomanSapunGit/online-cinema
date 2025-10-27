@@ -29,7 +29,7 @@ class CartItemModel(Base):
     __tablename__ = "cart_items"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     cart_id: Mapped[int] = mapped_column(ForeignKey("carts.id", ondelete="CASCADE"), nullable=False)
-    cart: Mapped["CartModel"] = relationship("CartModel", back_populates="cart_item")
+    cart: Mapped["CartModel"] = relationship("CartModel", back_populates="cart_items")
     movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id", ondelete="CASCADE"), nullable=False)
     movie: Mapped["MovieModel"] = relationship("MovieModel", back_populates="cart_items")
     added_at: Mapped[datetime] = mapped_column(
