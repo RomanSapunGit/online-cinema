@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "src"
+version = "0.1.0"
+description = ""
+authors = ["RomanSapunGit <sapunroma23@gmail.com>"]
+packages = []
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+psycopg2 = "2.9.10"
+alembic = "1.16.5"
+fastapi = "0.118.0"
+SQLAlchemy = "2.0.43"
+uvicorn = "0.37.0"
+aiosqlite = "0.21.0"
+passlib = "*"
+pytest = "*"
+pytest-asyncio = "*"
+python-jose = "*"
+celery = { version = "^5.4.0", extras = ["redis"] }
+sendgrid = "*"
+jinja2 = "*"
+pandas = "*"
+tqdm = "*"
+pydantic-settings = "*"
+python-dotenv = "*"
+asyncpg = "*"
+stripe = "*"
+fastapi-csrf-protect = "*"
+email_validator = "*"
+pytest-env = "*"
+pytest-cov = "*"
+flake8 = "*"
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
