@@ -1,0 +1,6 @@
+uuid,movie_name,year,time,imdb,votes,meta_score,gross,description,price,certification,genres,stars,directors,comment_text,comment_user
+,Inception,2010,148,3.8,2300000,74,836.8,A mind-bending thriller that explores dreams within dreams.,14.99,PG-13,Sci-Fi;Action,LeonardoDiCaprio;JosephGordon-Levitt,ChristopherNolan,Great visuals and story!,user1@example.com
+,Barbie,2023,114,2.4,350000,80,1500.0,A colorful satire exploring gender roles and self-identity.,12.99,PG-13,Comedy;Drama,MargotRobbie;RyanGosling,GretaGerwig,Funny and surprisingly deep!,user2@example.com
+,Once Upon a Time in Hollywood,2019,161,4.6,700000,83,374.3,An actor and his stunt double navigate 1969 Los Angeles.,13.99,R,Drama,BradPitt;LeonardoDiCaprio,QuentinTarantino,Great performances and setting.,user3@example.com
+,Avatar: The Way of Water,2022,192,1.8,1200000,67,2320.0,An epic return to Pandora with stunning visuals.,16.99,PG-13,Action;Adventure,SamWorthington;ZoeSaldana,JamesCameron,Visually breathtaking.,user4@example.com
+,La La Land,2016,128,0.0,620000,93,448.9,A jazz pianist and aspiring actress fall in love in Los Angeles.,11.99,PG-13,Drama;Comedy,EmmaStone;RyanGosling,DamienChazelle,Emotional and beautifully shot.,user5@example.com
