@@ -9,7 +9,7 @@
 .idea/**/aws.xml
 
 .idea/**/contentModel.xml
-
+.env**
 .idea/**/dataSources/
 .idea/**/dataSources.ids
 .idea/**/dataSources.local.xml
@@ -17,7 +17,8 @@
 .idea/**/dynamic.xml
 .idea/**/uiDesigner.xml
 .idea/**/dbnavigator.xml
-
+init.sql
+data
 .idea/**/gradle.xml
 .idea/**/libraries
 
