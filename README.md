@@ -162,4 +162,3 @@ pytest --cov=src --cov-report=html --cov-branch --cov-config=.coveragerc
 ```
 
 After running, open `htmlcov/index.html` in your browser to view the coverage report.
-
