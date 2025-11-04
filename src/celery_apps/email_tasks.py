@@ -1,10 +1,10 @@
+from celery import shared_task
 from sendgrid import SendGridAPIClient, Mail
 
-from celery_apps import notification_app
 from exceptions import BaseEmailError
 
 
-@notification_app.task
+@shared_task
 def send_email(email: str, subject: str, html_content: str, api_key: str, recipient: str):
     message = Mail(
         from_email=email,

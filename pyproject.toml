@@ -31,6 +31,7 @@ email_validator = "*"
 pytest-env = "*"
 pytest-cov = "*"
 flake8 = "*"
+gunicorn = "21.2.0"
 
 
 [build-system]

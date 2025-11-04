@@ -33,7 +33,7 @@ def get_accounts_email_notificator(
     )
 
 
-def get_jwt_auth_manager(settings: BaseAppSettings = Depends(get_settings)) -> JWTAuthManagerInterface:
+def get_jwt_auth_manager(settings: TestingSettings = Depends(get_settings)) -> JWTAuthManagerInterface:
     return JWTAuthManager(
         secret_key_access=settings.SECRET_KEY_ACCESS,
         secret_key_refresh=settings.SECRET_KEY_REFRESH,
@@ -42,6 +42,9 @@ def get_jwt_auth_manager(settings: BaseAppSettings = Depends(get_settings)) -> J
 
 
 async def csrf_guard(request: Request, csrf_protect: CsrfProtect = Depends()):
+    if request.method in ("GET", "HEAD", "OPTIONS"):
+        return
+    
     endpoint = request.scope.get("endpoint")
     if getattr(endpoint, "_csrf_exempt", False):
         return
