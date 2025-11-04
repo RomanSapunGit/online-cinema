@@ -5,6 +5,18 @@ The project integrates **JWT authentication**, **Celery for background tasks**, 
 
 ---
 
+## Deployment
+IP address: 13.48.226.9 
+Please use those credentials or create yours (e.g. to check email functionality, check spam folder)
+
+- email: r2399752@gmail.com,
+- password: P1A2s3s4@
+
+- Docs endpoint requires authentication, so firstly, please use login endpoint and obtain access token:
+http://13.48.226.9/api/v1/users/login
+
+To check stripe payment integration you don't need any additional POST request (all data is created), only csrf token and order id as query param (id = 1)
+
 ## Tech Stack
 
 |Category|Technology|
